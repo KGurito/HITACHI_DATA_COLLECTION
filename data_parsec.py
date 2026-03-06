@@ -14,7 +14,7 @@ def _export_report(df):
 
 def get_filesystem(api_key, hnas_storage):
 	url = f"https://{hnas_storage}:8444/v9/storage/filesystems"
-	payload={}
+	payload = {}
 	headers = {"X-Api-Key": api_key}
 
 	try:
