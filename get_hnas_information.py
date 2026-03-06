@@ -1,37 +1,25 @@
+#run: /home/storadm/.venv/bin/python3 /home/storadm/scripts_python/coleta_storages_hitachi/get_hnas_information.py
 #IMPORTAÇÃO DE BIBLIOTECAS#
 import pandas as pd
 import datetime as dt
 import requests, warnings, urllib3, json, sqlite3, os
 from dotenv import load_dotenv
+import data_parsec as dparsec
 
 
 #SUPRESSÃO DE CERTIFICADOS SL#
 warnings.simplefilter(action='ignore', category=FutureWarning)
 urllib3.disable_warnings()
 
-#INICIALIZAÇÃO .ENV#
+
+#INICIALIZAÇÃO .ENV PARA TESTES DE FUNÇÕES#
 load_dotenv()
+
 api_key = os.getenv("APIKEY_HNCL03TC")
 hncl03tc = os.getenv("HNCL03TC")
 
+data = dparsec.get_filesystem(api_key, hncl03tc)
+hnas_fs_info_df = dparsec._parse_nested_json_to_df(data)
+dparsec._export_report(hnas_fs_info_df)
 
-
-def get_filesystem(api_key, hnas_storage):
-	url = f"https://{hnas_storage}:8444/v9/storage/filesystems"
-	payload={}
-	headers = {"X-Api-Key": api_key}
-
-	try:
-		response = requests.request("GET", url, headers=headers, data=payload, verify=False)
-		response.raise_for_status()
-
-		json_export = json.loads(response.text)
-		return json_export
-
-	except requests.exceptions.RequestException as e:
-		print("ERROR na requisição!")
-		print(f"Detalhes do erro: {e}")
-		return None # Retorna vazio caso dê erro
-
-data = get_filesystem(api_key, hncl03tc)
-print(data)
+print(hnas_fs_info_df)
